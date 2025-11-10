@@ -39,7 +39,7 @@ const featuresData: Feature[] = [
       </svg>
     ),
     title: "Modern Design",
-    paragraph: "Lorem Ipsum is simply dummy text of the printing and industry.",
+    paragraph: "Create stunning websites and products with cutting-edge design frameworks optimized for speed, UX, and brand identity.",
     btn: "Learn More",
     btnLink: "/#",
   },
@@ -92,7 +92,7 @@ const featuresData: Feature[] = [
       </svg>
     ),
     title: "SaaS Starter Kit",
-    paragraph: "Lorem Ipsum is simply dummy text of the printing and industry.",
+    paragraph: "Kickstart your product journey with ready-to-use templates, integrations, and systems that cut months off your development time.",
     btn: "Learn More",
     btnLink: "/#",
   },

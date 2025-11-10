@@ -1,4 +1,7 @@
 "use client";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { createUser } from "@/lib/firebaseHelpers";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,31 +17,67 @@ const SignUp = () => {
   const [isPassword, setIsPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     setLoading(true);
     const data = new FormData(e.currentTarget);
-    const value = Object.fromEntries(data.entries());
-    const finalData = { ...value };
+    const name = data.get("name") as string;
+    const email = data.get("email") as string;
+    const password = data.get("password") as string;
 
-    fetch("/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(finalData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        toast.success("Successfully registered");
-        setLoading(false);
-        router.push("/signin");
-      })
-      .catch((err) => {
-        toast.error(err.message);
-        setLoading(false);
+    if (!name || !email || !password) {
+      toast.error("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCredential.user;
+
+      // Update user profile with name
+      await updateProfile(user, {
+        displayName: name,
       });
+
+      // Store user data in Firestore
+      await createUser(user.uid, {
+        name,
+        email,
+        createdAt: new Date().toISOString(),
+      });
+
+      toast.success("Account created successfully!");
+      setLoading(false);
+      router.push("/signin");
+    } catch (error: any) {
+      setLoading(false);
+      console.error("Signup error:", error);
+
+      // Handle specific Firebase errors
+      if (error.code === "auth/email-already-in-use") {
+        toast.error("Email already in use");
+      } else if (error.code === "auth/invalid-email") {
+        toast.error("Invalid email address");
+      } else if (error.code === "auth/weak-password") {
+        toast.error("Password is too weak");
+      } else {
+        toast.error(error.message || "Registration failed");
+      }
+    }
   };
 
   return (
@@ -53,18 +92,11 @@ const SignUp = () => {
               <div className="mb-10 text-center">
                 <Link href="/" className="mx-auto inline-block max-w-[160px]">
                   <Image
-                    src="/images/logo/logo.svg"
-                    alt="logo"
+                    src="/images/logo/trendy logo png.png"
+                    alt="Trendy SaaS Logo"
                     width={140}
-                    height={30}
-                    className="dark:hidden"
-                  />
-                  <Image
-                    src="/images/logo/logo-white.svg"
-                    alt="logo"
-                    width={140}
-                    height={30}
-                    className="hidden dark:block"
+                    height={40}
+                    className="max-w-full"
                   />
                 </Link>
               </div>

@@ -1,5 +1,7 @@
 "use client";
-import { signIn } from "next-auth/react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { createUser, getUser } from "@/lib/firebaseHelpers";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,30 +24,52 @@ const Signin = () => {
   const [isPassword, setIsPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const loginUser = (e: any) => {
+  const loginUser = async (e: any) => {
     e.preventDefault();
 
-    setLoading(true);
-    signIn("credentials", { ...loginData, redirect: false })
-      .then((callback) => {
-        if (callback?.error) {
-          toast.error(callback?.error);
-          console.log(callback?.error);
-          setLoading(false);
-          return;
-        }
+    if (!loginData.email || !loginData.password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
 
-        if (callback?.ok && !callback?.error) {
-          toast.success("Login successful");
-          setLoading(false);
-          router.push("/");
-        }
-      })
-      .catch((err) => {
-        setLoading(false);
-        console.log(err.message);
-        toast.error(err.message);
-      });
+    setLoading(true);
+    
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        loginData.email,
+        loginData.password
+      );
+      
+      const user = userCredential.user;
+      
+      // Store user session in localStorage
+      localStorage.setItem("user", JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+      }));
+      
+      toast.success("Login successful!");
+      setLoading(false);
+      router.push("/");
+    } catch (error: any) {
+      setLoading(false);
+      console.error("Login error:", error);
+      
+      // Handle specific Firebase errors
+      if (error.code === "auth/user-not-found") {
+        toast.error("No account found with this email");
+      } else if (error.code === "auth/wrong-password") {
+        toast.error("Incorrect password");
+      } else if (error.code === "auth/invalid-email") {
+        toast.error("Invalid email address");
+      } else if (error.code === "auth/too-many-requests") {
+        toast.error("Too many failed attempts. Please try again later");
+      } else {
+        toast.error(error.message || "Login failed");
+      }
+    }
   };
 
   return (
@@ -60,18 +84,11 @@ const Signin = () => {
               <div className="mb-10 text-center">
                 <Link href="/" className="mx-auto inline-block max-w-[160px]">
                   <Image
-                    src="/images/logo/logo.svg"
-                    alt="logo"
+                    src="/images/logo/trendy logo png.png"
+                    alt="Trendy SaaS Logo"
                     width={140}
-                    height={30}
-                    className="dark:hidden"
-                  />
-                  <Image
-                    src="/images/logo/logo-white.svg"
-                    alt="logo"
-                    width={140}
-                    height={30}
-                    className="hidden dark:block"
+                    height={40}
+                    className="max-w-full"
                   />
                 </Link>
               </div>

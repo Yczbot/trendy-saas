@@ -3,10 +3,14 @@ import SectionTitle from "../Common/SectionTitle";
 import PricingBox from "./PricingBox";
 import { pricingData } from "@/stripe/pricingData";
 
-const Pricing = () => {
+interface PricingProps {
+  showId?: boolean;
+}
+
+const Pricing = ({ showId = true }: PricingProps) => {
   return (
     <section
-      id="pricing"
+      {...(showId && { id: "pricing" })}
       className="relative z-20 overflow-hidden bg-white pb-12 pt-20 dark:bg-dark lg:pb-[90px] lg:pt-[120px]"
     >
       <div className="container">
