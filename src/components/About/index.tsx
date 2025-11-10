@@ -13,7 +13,7 @@ const About = () => {
             <div className="w-full px-4 lg:w-1/2">
               <div className="mb-12 max-w-[540px] lg:mb-0">
                 <h2 className="mb-5 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2]">
-                  Building What's Next in the World of SaaS
+                  Building What&apos;s Next in the World of SaaS
                 </h2>
                 <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
                   Build, manage, and scale your SaaS projects with Trendy SaaS — a powerful starter framework for founders, developers, and creators.
